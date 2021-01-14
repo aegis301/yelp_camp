@@ -1,0 +1,106 @@
+const port = 3000; //define port
+const express = require("express"); // require express
+const path = require("path"); // require path module
+const mongoose = require("mongoose"); // require mongoose
+const Joi = require("joi"); // require joi for auth
+const methodOverride = require("method-override"); // require m-o to get access to put and update req
+const ejsMate = require("ejs-mate");
+const session = require("express-session"); // include express sessions
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+// required utils
+const ExpressError = require("./utils/ExpressError"); // require custom error class
+// required models
+const Campground = require("./models/campground"); // require file where campground model is stored
+const Review = require("./models/review");
+const User = require("./models/user");
+const { validationCampgroundSchema, reviewSchema } = require("./schemas");
+// required routes
+const userRoutes = require("./routes/users");
+const reviewRoutes = require("./routes/reviews");
+const campgroundRoutes = require("./routes/campground");
+
+mongoose.connect("mongodb://localhost:27017/yelp-camp", {
+	useNewUrlParser: true,
+	useCreateIndex: true,
+	useUnifiedTopology: true,
+	useFindAndModify: false,
+});
+
+// checks if connection was successful
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", () => {
+	console.log("Database connected");
+});
+
+const app = express(); // creates instance of express object to initialize the app
+
+// standard config
+app.engine("ejs", ejsMate); // use ejs-mate engine
+app.set("view engine", "ejs"); // set view engine
+app.set("views", path.join(__dirname, "views")); // use path module to tell express where to find views
+
+app.use(express.urlencoded({ extended: true })); // tells express to parse the body in a post request
+app.use(methodOverride("_method")); // create method-override
+app.use(express.static(path.join(__dirname, "public"))); // serve static directories
+
+// setup express sessions
+const sessionConfig = {
+	secret: "thisshouldbeabettersecret",
+	resave: false,
+	saveUninitialized: true,
+	cookie: {
+		httpOnly: true,
+		expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+	},
+};
+app.use(session(sessionConfig));
+
+// setup for flash (depends on sessions)
+app.use(flash());
+
+// setup for passport
+app.use(passport.initialize());
+app.use(passport.session()); // make passport use consistent sessions and not log in on every single request
+passport.use(new LocalStrategy(User.authenticate())); // makes passport use local strategy and Model.authenticate() as authentication (all of that gets imported on installing the modules)
+
+passport.serializeUser(User.serializeUser()); // specifies how to store user in the session
+passport.deserializeUser(User.deserializeUser()); // specifies how to get rid of the user in the session
+
+// middleware to set up stuff I have access to in every single template ('locals')
+app.use((req, res, next) => {
+	res.locals.currentUser = req.user; // makes currentUser available, user is added onto req by passport
+	res.locals.success = req.flash("success");
+	res.locals.error = req.flash("error");
+	next();
+});
+
+// enable routes
+app.use("/", userRoutes);
+app.use("/campground", campgroundRoutes);
+app.use("/campground/:id/reviews", reviewRoutes);
+
+// root route
+app.get("/", (req, res) => {
+	res.render("home");
+});
+
+// every route and request that could not have been handled
+app.all("*", (req, res, next) => {
+	next(new ExpressError("Page Not Found"), 404);
+});
+
+//error handling middleware
+app.use((err, req, res, next) => {
+	const { statusCode = 500 } = err;
+	if (!err.message) err.message = "Something went wrong";
+	res.status(statusCode).render("error", { err });
+});
+
+// server listen command
+app.listen(port, () => {
+	console.log(`SERVER LISTENING TO PORT ${port}`);
+});

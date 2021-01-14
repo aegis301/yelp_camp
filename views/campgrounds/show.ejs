@@ -1,0 +1,132 @@
+<% layout('layouts/boilerplate') %>
+
+<link rel="stylesheet" href="/stylesheets/stars.css" />
+<div class="row">
+	<div class="col-6">
+		<div class="card mb-5 mt-3">
+			<img src="<%= campground.image %> " alt="Picture of Campground" />
+			<div class="card-body">
+				<h5 class="card-title"><%= campground.title %></h5>
+				<div class="card-text"><%= campground.description %></div>
+			</div>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item text-muted"><%= campground.location %></li>
+				<li class="list-group-item">$ <%= campground.price %> per night</li>
+				<li class="list-group-item text-muted">
+					Submitted by: <%= campground.author.username %>
+				</li>
+			</ul>
+			<% if(currentUser && campground.author.equals(currentUser._id)) {%>
+			<div class="card-body">
+				<a
+					class="card-link btn btn-info"
+					href="/campground/<%= campground._id %>/edit "
+					>Edit</a
+				>
+				<form
+					class="d-inline"
+					action="/campground/<%= campground._id %>?_method=DELETE "
+					method="POST"
+				>
+					<button class="btn btn-danger">Delete</button>
+				</form>
+			</div>
+			<% } %>
+		</div>
+	</div>
+	<div class="col-6">
+		<% if(currentUser) { %>
+		<h2>Leave a Review</h2>
+		<form
+			class="mb-3 validated-form"
+			action="/campground/<%= campground._id%>/reviews"
+			method="POST"
+			novalidate
+		>
+			<!-- starability slider -->
+			<div class="mb-3">
+				<fieldset class="starability-basic">
+					<legend>Rating:</legend>
+					<input
+						type="radio"
+						id="no-rate"
+						class="input-no-rate"
+						name="review[rating]"
+						value="1"
+						checked
+						aria-label="No rating."
+					/>
+					<input
+						type="radio"
+						id="first-rate1"
+						name="review[rating]"
+						value="1"
+					/>
+					<label for="first-rate1" title="Terrible">1 star</label>
+					<input
+						type="radio"
+						id="first-rate2"
+						name="review[rating]"
+						value="2"
+					/>
+					<label for="first-rate2" title="Not good">2 stars</label>
+					<input
+						type="radio"
+						id="first-rate3"
+						name="review[rating]"
+						value="3"
+					/>
+					<label for="first-rate3" title="Average">3 stars</label>
+					<input
+						type="radio"
+						id="first-rate4"
+						name="review[rating]"
+						value="4"
+					/>
+					<label for="first-rate4" title="Very good">4 stars</label>
+					<input
+						type="radio"
+						id="first-rate5"
+						name="review[rating]"
+						value="5"
+					/>
+					<label for="first-rate5" title="Amazing">5 stars</label>
+				</fieldset>
+			</div>
+			<div class="mb-3">
+				<label class="form-label" for="reviewbody">Review</label>
+				<textarea
+					class="form-control"
+					name="review[reviewbody]"
+					id="reviewbody"
+					cols="30"
+					rows="3"
+					required
+				></textarea>
+			</div>
+			<button class="btn btn-success">Submit Review</button>
+		</form>
+		<% } %> <% for(let review of campground.reviews) { %>
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="card-title"><%= review.author.username%></h5>
+				<p class="card-text"><%= review.reviewbody %></p>
+				<p
+					class="card-text starability-result"
+					data-rating="<%= review.rating %>"
+				>
+					Rated: <%= review.rating %> stars
+				</p>
+				<% if(currentUser && review.author.equals(currentUser._id)) {%>
+				<form
+					action="/campground/<%= campground._id %>/reviews/<%=review._id%>?_method=DELETE"
+					method="POST"
+				>
+					<button class="btn btn-sm btn-danger">Delete</button>
+				</form>
+				<% } %>
+			</div>
+		</div>
+		<% } %>
+	</div>
+</div>
