@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+}
+
+
 const port = 3000; //define port
 const express = require("express"); // require express
 const path = require("path"); // require path module
