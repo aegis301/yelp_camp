@@ -7,21 +7,18 @@ const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 const campgrounds = require("../controllers/campgrounds");
 const multer = require("multer");
 const { storage } = require("../cloudinary");
-const upload = multer({storage});
+const upload = multer({ storage });
 
 router
 	.route("/")
 	.get(catchAsync(campgrounds.index)) // show root page
-	// .post(
-	// 	isLoggedIn,
-	// 	validateCampground,
-	// 	catchAsync(campgrounds.createCampground)
-	// );
-	.post(upload.array("image"), (req, res) => {
-		console.log('ROUTE FIRED')
-		console.log(req.files);
-		res.send("IT WORKED")
-	}); // send POST request to add new campground
+	.post(
+		isLoggedIn,
+		upload.array("image"),
+		validateCampground,
+		catchAsync(campgrounds.createCampground)
+	);
+// send POST request to add new campground
 
 router.get("/new", isLoggedIn, campgrounds.renderNewForm); // show form to create new campground
 
