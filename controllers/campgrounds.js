@@ -1,4 +1,5 @@
 const Campground = require("../models/campground");
+const multer = require('multer');
 
 module.exports.index = async (req, res) => {
 	// show index page
@@ -38,7 +39,6 @@ module.exports.showCampground = async (req, res) => {
 		req.flash("error", "Cannot find campground");
 		return res.redirect("/campground");
 	}
-	console.log(campground.images)
 	res.render("campgrounds/show", { campground });
 };
 
@@ -53,7 +53,12 @@ module.exports.updateCampground = async (req, res) => {
 	const { id } = req.params; // save out id to var
 	const campground = await Campground.findByIdAndUpdate(id, {
 		...req.body.campground,
-	}); // use spread operator to pass in values to db
+	}); // use spread operator to pass in values to db\
+	console.log(req.body)
+	const imgs = req.files.map(file => ({url: file.path, filename: file.filename }));
+	// map images into object (create array of objects)
+	campground.images.push(...imgs);
+	await campground.save();
 	req.flash("success", "Successfully updated campground!");
 	res.redirect(`/campground/${campground._id}`);
 };
