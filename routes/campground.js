@@ -5,32 +5,35 @@ const Campground = require("../models/campground"); // require file where campgr
 const Review = require("../models/review");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
 const campgrounds = require("../controllers/campgrounds");
-const multer = require('multer');
-const upload = multer({dest: 'uploads/'})
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({storage});
 
 router
 	.route("/")
-	.get(catchAsync(campgrounds.index)) 									// show root page
+	.get(catchAsync(campgrounds.index)) // show root page
 	// .post(
 	// 	isLoggedIn,
 	// 	validateCampground,
 	// 	catchAsync(campgrounds.createCampground)
-	// ); 		
-	.post(upload.array('image'), (req, res) => {
-		console.log(req.body);
-	})																// send POST request to add new campground
+	// );
+	.post(upload.array("image"), (req, res) => {
+		console.log('ROUTE FIRED')
+		console.log(req.files);
+		res.send("IT WORKED")
+	}); // send POST request to add new campground
 
-router.get("/new", isLoggedIn, campgrounds.renderNewForm); 					// show form to create new campground
+router.get("/new", isLoggedIn, campgrounds.renderNewForm); // show form to create new campground
 
 router
 	.route("/:id")
-	.get(catchAsync(campgrounds.showCampground))							// search for specific campground by id and show it
+	.get(catchAsync(campgrounds.showCampground)) // search for specific campground by id and show it
 	.put(
 		isLoggedIn,
 		isAuthor,
 		validateCampground,
 		catchAsync(campgrounds.updateCampground)
-	) 																		 // update campground
+	) // update campground
 	.delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground)); // delete campground
 
 router.get(
@@ -38,6 +41,6 @@ router.get(
 	isLoggedIn,
 	isAuthor,
 	catchAsync(campgrounds.editCampground)
-); 																			 // edit campground
+); // edit campground
 
 module.exports = router;
