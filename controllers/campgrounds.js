@@ -1,5 +1,6 @@
 const Campground = require("../models/campground");
-const multer = require('multer');
+const multer = require("multer");
+const { cloudinary } = require("../cloudinary");
 
 module.exports.index = async (req, res) => {
 	// show index page
@@ -13,11 +14,13 @@ module.exports.renderNewForm = async (req, res) => {
 };
 
 module.exports.createCampground = async (req, res, next) => {
-	
 	// create new campground
 	const campground = new Campground(req.body.campground);
 	// map images into object (create array of objects)
-	campground.images = req.files.map(file => ({url: file.path, filename: file.filename }))
+	campground.images = req.files.map((file) => ({
+		url: file.path,
+		filename: file.filename,
+	}));
 	campground.author = req.user._id;
 	await campground.save();
 	req.flash("success", "Successfully made a new campground!");
@@ -54,11 +57,21 @@ module.exports.updateCampground = async (req, res) => {
 	const campground = await Campground.findByIdAndUpdate(id, {
 		...req.body.campground,
 	}); // use spread operator to pass in values to db\
-	console.log(req.body)
-	const imgs = req.files.map(file => ({url: file.path, filename: file.filename }));
+	const imgs = req.files.map((file) => ({
+		url: file.path,
+		filename: file.filename,
+	}));
 	// map images into object (create array of objects)
 	campground.images.push(...imgs);
 	await campground.save();
+	if (req.body.deleteImages) {
+		for (let filename of req.body.deleteImages) {
+			await cloudinary.uploader.destroy(filename);
+		}
+		await campground.updateOne({
+			$pull: { images: { filename: { $in: req.body.deleteImages } } },
+		});
+	}
 	req.flash("success", "Successfully updated campground!");
 	res.redirect(`/campground/${campground._id}`);
 };

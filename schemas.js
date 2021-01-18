@@ -7,7 +7,8 @@ module.exports.validationCampgroundSchema = Joi.object({
 		description: Joi.string().required(),
 		location: Joi.string().required(),
 	}).required(),
-	image: Joi.alternatives().try(Joi.array(), Joi.string()).allow(null).allow('')
+	image: Joi.alternatives().try(Joi.array(), Joi.string()).allow(null).allow(''),
+	deleteImages: Joi.array()
 });
 
 
