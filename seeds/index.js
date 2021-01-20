@@ -26,7 +26,7 @@ const sample = (array) => array[Math.floor(Math.random() * array.length)];
 const seedDB = async () => {
 	// clear database
 	await Campground.deleteMany({});
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 500; i++) {
 		// choose a random city
 		const random1000 = Math.floor(Math.random() * 1000);
 		// generate random price
@@ -38,6 +38,10 @@ const seedDB = async () => {
 			description:
 				"Sit consequat elit ipsum dolore et nulla culpa dolore dolore mollit Lorem mollit excepteur.",
 			price: price,
+			geometry: {
+				type: "Point",
+				coordinates: [cities[random1000].longitude, cities[random1000].latitude]
+			},
 			author: "5ffff7c63e5ad2209db121b3",
 			images: [
 				{
