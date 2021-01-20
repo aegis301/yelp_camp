@@ -12,13 +12,18 @@
 			crossorigin="anonymous"
 		/>
 		<script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+
+		<script src="https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js"></script>
+		<link
+			href="https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css"
+			rel="stylesheet"
+		/>
 	</head>
 
 	<body class="d-flex flex-column vh-100">
 		<%- include('../partials/navbar')%>
 		<main class="container mt-5">
-            <%- include('../partials/flash')%> 
-            <%- body %>
+			<%- include('../partials/flash')%> <%- body %>
 		</main>
 		<%- include('../partials/footer')%>
 		<script
@@ -30,9 +35,9 @@
 			src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
 			integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
 			crossorigin="anonymous"
-        ></script>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
+		></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.min.js"></script>
 
 		<script src="/js/validateForms.js"></script>
 	</body>
