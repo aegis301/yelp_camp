@@ -3,7 +3,7 @@
 
 <div class="row">
 	<div class="col-6">
-        
+        <% if(campground.images.length) {%> 
 		<div id="campgroundCarousel" class="carousel slide" data-ride="carousel">
 			<div class="carousel-inner">
 				<% campground.images.forEach((img, i) => { %>
@@ -33,7 +33,9 @@
 			</a>
 			<% } %>
 		</div>
-
+        <% } else {%>
+            <img src="https://res.cloudinary.com/ddiurydgo/image/upload/v1610968372/YelpCamp/cvhivhcar1ikoz1sy6j9.jpg" class="d-block w-100" alt="" />
+        <% } %>  
 		<div class="card mb-3">
 			<div class="card-body">
 				<h5 class="card-title"><%= campground.title%></h5>
