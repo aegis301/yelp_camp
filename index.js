@@ -27,11 +27,15 @@ const campgroundRoutes = require("./routes/campground");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 
-mongoose.connect("mongodb://localhost:27017/yelp-camp", {
-	useNewUrlParser: true,
-	useCreateIndex: true,
-	useUnifiedTopology: true,
-	useFindAndModify: false,
+const MongoDBStore = require("connect-mongo")(session);
+
+const dbUrl = 'mongodb://localhost:27017/yelp-camp';
+// process.env.DB_URL ||
+mongoose.connect(dbUrl, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
 });
 
 // checks if connection was successful
@@ -98,8 +102,19 @@ app.use(
 	})
 );
 
+const store = new MongoDBStore({
+	url: dbUrl,
+	secret: 'thisshouldbeabettersecret',
+	touchAfter: 24 * 3600
+})
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
 // setup express sessions
 const sessionConfig = {
+	store,
 	name: "ycsession",
 	secret: "thisshouldbeabettersecret",
 	resave: false,
