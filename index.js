@@ -29,13 +29,13 @@ const helmet = require("helmet");
 
 const MongoDBStore = require("connect-mongo")(session);
 
-const dbUrl = 'mongodb://localhost:27017/yelp-camp';
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
 // process.env.DB_URL ||
 mongoose.connect(dbUrl, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
+	useNewUrlParser: true,
+	useCreateIndex: true,
+	useUnifiedTopology: true,
+	useFindAndModify: false,
 });
 
 // checks if connection was successful
@@ -102,21 +102,23 @@ app.use(
 	})
 );
 
+const secret = process.env.SECRET || "thisshouldbeabettersecret"
+
 const store = new MongoDBStore({
 	url: dbUrl,
-	secret: 'thisshouldbeabettersecret',
-	touchAfter: 24 * 3600
-})
+	secret: secret,
+	touchAfter: 24 * 3600,
+});
 
 store.on("error", function (e) {
-    console.log("SESSION STORE ERROR", e)
-})
+	console.log("SESSION STORE ERROR", e);
+});
 
 // setup express sessions
 const sessionConfig = {
 	store,
 	name: "ycsession",
-	secret: "thisshouldbeabettersecret",
+	secret: secret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
